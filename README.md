@@ -113,6 +113,50 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 - `BoardGeneratedMapAssetUtility.cs`
   Editor-only helper used by `BoardRandomGenerator` to save the latest random result as a `.asset` file.
 
+### `Assets/Scripts/Cards`
+
+- `Data/*`
+  ScriptableObject data for character cards, food cards, food combos, rarity multipliers, and shared card enums.
+
+- `Runtime/*`
+  Runtime systems for the 30-card pool, 7-card hand, draw bias, gold, AP, play validation, turn session hooks, and drag-to-deploy card flow.
+
+- `UI/*`
+  Lightweight UGUI views for hand cards. `CardView` shows playable/blocked state, red costs for missing resources, food-card click purchase, and character-card drag.
+
+### `Assets/Scripts/Tokens`
+
+- `GameToken.cs`
+  Board character entity spawned from a character card. Stores current combat stats, team, board position, 3 food slots, and Combo readiness.
+
+- `TokenSpawner.cs`
+  Spawns tokens onto valid `BoardCell` positions and writes token occupancy through `BoardManager.SetOccupiedUnit`.
+
+- `DeploymentZone.cs`
+  Optional deploy-zone validator. If absent, any placeable board cell is valid for deployment.
+
+### `Assets/Scripts/Food`
+
+- `FoodBar.cs`
+  Six-slot temporary food storage. Food cards bought from the hand go here before being fed to a token.
+
+- `FoodSlot.cs`
+  A token stomach slot with 3-turn duration.
+
+- `FoodBarView.cs`
+  Simple UGUI view for food-bar contents.
+
+### `Assets/Scripts/Combos`
+
+- `ComboManager.cs`
+  Finds common or race-specific food combos from three food types.
+
+- `ComboResolver.cs`
+  Treats combos as skills. It supports single damage, AOE damage, healing, ally buffs, terrain change, summon, and special placeholders.
+
+- `ComboTargetingController.cs`
+  Enters target-selection mode for combo skills that need a board cell or token target.
+
 ### `Assets/Scripts/Units`
 
 - `UnitData.cs`
@@ -165,6 +209,77 @@ Assign references:
   - enable `Load Default Map On Start` to use a saved generated map
   - enable `Generate On Start` to create a new random map on play
 
+### Card system objects
+
+Recommended runtime objects:
+
+```text
+Scene
+├── CardRuntime
+│   ├── CardPool
+│   ├── HandManager
+│   ├── GoldManager
+│   ├── APManager
+│   ├── CardPlayValidator
+│   ├── CardDragController
+│   └── CardGameSession
+├── FoodRuntime
+│   └── FoodBar
+├── ComboRuntime
+│   ├── ComboManager
+│   ├── ComboResolver
+│   └── ComboTargetingController
+└── BoardRoot
+    └── UnitsRoot / TokenSpawner
+```
+
+Assign references:
+
+- `CardPool`
+  - `All Character Cards`
+  - `All Food Cards`
+  - `Character Target Count` defaults to 20, leaving 10 food cards in the 30-card pool.
+
+- `HandManager`
+  - `CardPool`
+  - `GoldManager`
+  - `APManager`
+  - `FoodBar`
+  - `TokenSpawner`
+  - `CardPlayValidator`
+
+- `CardPlayValidator`
+  - `BoardManager`
+  - `GoldManager`
+  - `APManager`
+  - `FoodBar`
+  - `TokenSpawner`
+
+- `TokenSpawner`
+  - `BoardManager`
+  - `UnitsRoot`
+  - optional default `GameToken` prefab
+  - optional `DeploymentZone`
+
+- `CardDragController`
+  - `Main Camera`
+  - `BoardManager`
+  - `BoardHighlighter`
+  - `TerrainTilemap`
+  - `HandManager`
+  - `CardPlayValidator`
+
+- `ComboResolver`
+  - `BoardManager`
+  - `APManager`
+  - `TokenSpawner`
+
+- `ComboTargetingController`
+  - `BoardManager`
+  - `BoardHighlighter`
+  - `ComboResolver`
+  - `TokenSpawner`
+
 ## Tile database setup
 
 Create the database:
@@ -200,6 +315,79 @@ For physical collision support, attach `BoardTilemapCollisionSetup` to `TerrainT
 - `Rigidbody2D` set to `Static` when using Composite Collider
 
 Use collider setup for physics interaction, blockers, and future visual effects. Do not use physics raycasts as the primary board selection or movement rule system.
+
+## Card, gold, AP, and combo flow
+
+The card loop follows the FatBall Kingdom rules:
+
+```text
+Build 30-card pool before the game
+Draw 7 cards to hand on start
+Buy/use 1 hand card
+Remove that card from hand
+Draw 1 replacement from the pool
+```
+
+Gold and AP are separate resources:
+
+- Gold buys cards.
+- AP pays for board actions.
+- Character cards require both Gold and AP when deployed.
+- Food cards require Gold only and go into the six-slot `FoodBar`.
+- Feeding a food to a token costs 0 AP.
+- Fast-eat Combo skills spend the combo AP cost, normally 2 AP.
+
+### Character cards
+
+Character cards are not clicked and bought first. Their intended interaction is:
+
+```text
+Drag playable character card from hand
+Highlight valid deploy cells
+Drop on a legal board cell
+Spend Gold + AP
+Spawn GameToken on the board
+Remove card from hand
+Draw replacement card
+```
+
+`CardView` shows affordability:
+
+- playable card: normal alpha/color
+- not enough Gold: Gold cost turns red
+- not enough AP: AP cost turns red
+- invalid target/no deploy cell: card is dimmed
+
+### Food cards
+
+Food cards are bought into the food bar:
+
+```text
+Click playable food card
+Spend Gold
+Store FoodCardData in FoodBar
+Remove card from hand
+Draw replacement card
+```
+
+Food cards are blocked if Gold is insufficient or the food bar is full.
+
+### Token food slots and Combo skills
+
+Each `GameToken` has 3 stomach slots. Feeding applies instant effects and stores the food for 3 turns. When all 3 slots are filled, `ComboManager` checks the recipe and race.
+
+Combo effects are treated as skills, not just buffs. `ComboResolver` currently supports:
+
+- single-target damage
+- AOE damage
+- healing
+- ally buff
+- debuff/damage placeholder
+- summon
+- terrain change
+- special placeholder for custom logic
+
+Combos with a target type use `ComboTargetingController` to highlight valid cells or tokens before resolving.
 
 ## Random map generation
 
@@ -369,6 +557,61 @@ This Editor-only method creates a `BoardGeneratedMap` asset. Assign that asset a
 
 ```csharp
 boardRandomGenerator.LoadDefaultMap();
+```
+
+### Card hand and resources
+
+Create character and food assets:
+
+```text
+Project window > Create > FatBallKingdom > Character Card
+Project window > Create > FatBallKingdom > Food Card
+Project window > Create > FatBallKingdom > Food Combo
+```
+
+Assign them to `CardPool`, then run the scene. `HandManager` draws up to 7 cards. `GoldManager` starts at 10 gold, and `APManager` starts with AP according to its inspector values.
+
+### Character drag deployment
+
+Requirements:
+
+1. The hand has a character card.
+2. Gold is at least the card Gold cost.
+3. AP is at least the card AP cost.
+4. The target cell exists, is walkable, is empty, and is inside `DeploymentZone` if one is assigned.
+
+Drag a playable `CardView` from the hand onto the board. On a legal drop:
+
+```text
+Gold/AP are spent
+GameToken is spawned under UnitsRoot
+BoardCell.OccupiedUnit is set
+The card leaves the hand
+One replacement card is drawn from CardPool
+```
+
+### Food card purchase and feeding
+
+Click a playable food card. It spends Gold and enters the six-slot `FoodBar`. Feeding can then be done in code:
+
+```csharp
+foodBar.Feed(foodIndex, targetToken);
+```
+
+Feeding costs 0 AP. The target token receives instant food effects and stores the food in one of its 3 stomach slots.
+
+### Combo skill resolution
+
+When a token has 3 filled food slots, call:
+
+```csharp
+comboTargetingController.BeginCombo(token);
+```
+
+If the combo needs no target, it resolves immediately. If it needs a target, valid cells are highlighted and the selected target can be confirmed with:
+
+```csharp
+comboTargetingController.ConfirmTarget(boardPosition);
 ```
 
 ## If the map does not display
