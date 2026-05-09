@@ -182,6 +182,23 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 - `GameFlowBootstrap.cs`
   Optional helper for entering main menu or starting a run automatically.
 
+### `Assets/Scripts/UI/GameFlow`
+
+- `GameStateViewRouter.cs`
+  Shows/hides main menu, battle HUD, pause, and result panels based on `GameStateManager.CurrentState`.
+
+- `MainMenuView.cs`
+  Simple main-menu shell. Start calls `GameStateManager.StartNewRun()`, options toggles an options panel, quit calls `Application.Quit()`.
+
+- `BattleHUDView.cs`
+  Simple battle HUD shell for turn, phase, Gold, AP, end-turn, and pause controls.
+
+- `PauseMenuView.cs`
+  Resume and return-to-main-menu controls.
+
+- `ResultView.cs`
+  Victory/defeat panel with retry and return-to-main-menu controls.
+
 ### `Assets/Scripts/Units`
 
 - `UnitData.cs`
@@ -332,6 +349,44 @@ Assign references:
   - `TokenSpawner`
   - `TurnManager`
 
+### Basic menu and HUD shell
+
+Recommended Canvas structure:
+
+```text
+Canvas
+├── MainMenuPanel
+│   ├── StartButton
+│   ├── OptionsButton
+│   ├── QuitButton
+│   └── OptionsPanel
+├── BattleHUDPanel
+│   ├── TurnText
+│   ├── PhaseText
+│   ├── GoldText
+│   ├── APText
+│   ├── EndTurnButton
+│   └── PauseButton
+├── PauseMenuPanel
+│   ├── ResumeButton
+│   └── MainMenuButton
+└── ResultPanel
+    ├── TitleText
+    ├── MessageText
+    ├── RetryButton
+    └── MainMenuButton
+```
+
+Attach:
+
+- `GameStateViewRouter` to the Canvas or a UI root object.
+- `MainMenuView` to `MainMenuPanel`.
+- `BattleHUDView` to `BattleHUDPanel`.
+- `PauseMenuView` to `PauseMenuPanel`.
+- `ResultView` to `ResultPanel`.
+
+Wire panel and button references in the Inspector. The UI shell contains only logic and placeholder UGUI references, so its visuals can be replaced with any hand-drawn/tabletop UI sprites later.
+
 ## Tile database setup
 
 Create the database:
@@ -424,6 +479,39 @@ Current standard events include:
 - `ComboReadyEvent`, `ComboTriggeredEvent`
 - `TerrainChangedEvent`
 - `VictoryEvent`, `DefeatEvent`
+
+## Stylized UI asset workflow
+
+For the hand-drawn tabletop style from the reference image, prefer UI kits with:
+
+- parchment or paper panel backgrounds
+- wooden or brass button frames
+- 9-sliced frames and borders
+- hand-drawn icon sets
+- readable fantasy/tabletop fonts
+- separate sprites for normal, hover, pressed, disabled, and highlighted states
+
+Recommended workflow:
+
+1. Import UI sprites as `Sprite (2D and UI)`.
+2. Use Sprite Editor borders and set panels/buttons to `Image Type: Sliced`.
+3. Build reusable prefabs:
+   - `UIPanel_Parchment`
+   - `UIButton_Wood`
+   - `UICardFrame_Common/Rare/Epic/Legendary`
+   - `UIResourceBadge_Gold/AP`
+4. Keep logic scripts on parent view objects, not inside art-only child objects.
+5. Use one consistent font family for labels and a second accent font only for titles.
+6. Put repeated icons and frames in Sprite Atlases once the art direction stabilizes.
+
+Good places to look for assets:
+
+- Unity Asset Store: search `fantasy gui`, `hand drawn ui`, `rpg ui`, `board game ui`.
+- itch.io asset packs: often good for indie hand-painted UI frames and icons.
+- Kenney UI packs: useful for clean placeholders, though less hand-painted.
+- Game-icons.net: useful for prototype icons; check license attribution requirements.
+
+Avoid mixing too many UI packs. Pick one main panel/button style, then recolor or lightly edit it so cards, HUD, menus, and popup panels feel like the same board game.
 
 ## Card, gold, AP, and combo flow
 
