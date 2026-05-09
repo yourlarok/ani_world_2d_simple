@@ -39,16 +39,16 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 
 ### `Assets/Scripts/Board`
 
-- `TerrainType.cs`  
+- `TerrainType.cs`
   Terrain enum: `Grass`, `Forest`, `Snow`, `Desert`, `Water`, `Swamp`, `Stone`, `Mud`, `Unknown`.
 
-- `BoardCell.cs`  
+- `BoardCell.cs`
   Pure logic data. Stores board position, terrain, walkability, move cost, cell state, destructible flag, and occupied unit reference.
 
-- `BoardTileDatabase.cs`  
+- `BoardTileDatabase.cs`
   `ScriptableObject` mapping each `TerrainType` to one or more `TileBase` assets. This avoids hard-coded asset paths and supports visual variants.
 
-- `BoardManager.cs`  
+- `BoardManager.cs`
   Core board entry point. Owns `BoardCell` data and updates the terrain Tilemap. Provides:
   - `GenerateRect`
   - `ClearBoard`
@@ -64,22 +64,22 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
   - `CanPlaceUnit`, `SetOccupiedUnit`, `ClearOccupiedUnit`
   - `SetCellState`, `SetCellDestructible`
 
-- `BoardCoordinateUtility.cs`  
+- `BoardCoordinateUtility.cs`
   Converts between `Vector2Int`, Tilemap `Vector3Int`, and world cell centers.
 
-- `TerrainPatch.cs`  
+- `TerrainPatch.cs`
   `ScriptableObject` terrain template. Used to place prepared terrain modules into the board.
 
-- `BoardInputController.cs`  
+- `BoardInputController.cs`
   Left-clicks the Tilemap, converts mouse world position to board coordinate, logs cell information, and selects valid cells.
 
-- `BoardHighlighter.cs`  
+- `BoardHighlighter.cs`
   Writes selected/move/attack highlights only to `HighlightTilemap`.
 
-- `BoardGenerator.cs`  
+- `BoardGenerator.cs`
   Small helper for regenerating a rectangular board from inspector parameters.
 
-- `BoardExpansionController.cs`  
+- `BoardExpansionController.cs`
   Runtime test controller:
   - `R`: expand right
   - `L`: expand left
@@ -90,10 +90,10 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 
 ### `Assets/Scripts/Units`
 
-- `UnitData.cs`  
+- `UnitData.cs`
   Minimal unit data asset reserved for future unit work.
 
-- `UnitController.cs`  
+- `UnitController.cs`
   Minimal placement helper. Units are independent GameObjects under `UnitsRoot`, not Tilemap tiles.
 
 ## Inspector setup
