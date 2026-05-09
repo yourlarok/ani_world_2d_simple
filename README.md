@@ -35,6 +35,42 @@ GameObject > 2D Object > Tilemap > Isometric
 
 Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 
+## One-click demo scene builder
+
+After opening the project in Unity 2022, run:
+
+```text
+Tools > FatBallKingdom > Build Demo Battle Scene
+```
+
+The tool generates:
+
+```text
+Assets/Demo/
+├── Scenes/Demo_Battle.unity
+├── Generated/Sprites/
+├── Generated/Tiles/
+├── Generated/Data/
+└── Generated/Prefabs/
+```
+
+It builds a concept-inspired demo scene with:
+
+- isometric `Grid` and four Tilemap layers
+- placeholder hand-painted style diamond terrain tiles
+- grass/forest/snow/desert/water/stone distribution biased like the reference image
+- orthographic camera aimed at a tabletop board composition
+- `BoardManager`, `BoardRandomGenerator`, `TokenSpawner`, `CardPool`, `HandManager`, `GoldManager`, `APManager`, `ComboManager`, `GameStateManager`, `TurnManager`, and UI references wired
+- generated `BoardTileDatabase`
+- generated `BoardGenerationConfig`
+- generated `CardVisualStyle`
+- generated `ClassTokenVisualDatabase`
+- demo character cards, food cards, and combos
+- demo token prefab
+- Canvas with main menu, battle HUD, hand panel, food bar, character panel, combo ready panel, pause panel, and result panel
+
+Open `Assets/Demo/Scenes/Demo_Battle.unity`, press Play, then click **Start Game**. The first pass is meant as an executable graybox/art-slot demo: it uses generated placeholder art that you can replace through the exposed Inspector slots.
+
 ## Scripts
 
 ### `Assets/Scripts/Board`
@@ -206,8 +242,16 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 - `CharacterPanelView.cs`
   Left-side character panel shell with portrait, race/class/rarity visuals, stat icons, three food-slot visuals, Combo indicator, and fast-eat button.
 
+- `BoardSelectionPanelController.cs`
+  Connects board clicks to `CharacterPanelView`. Clicking a cell with a `GameToken` opens the panel; clicking an empty cell clears it.
+
 - `ComboReadyView.cs`
   Combo prompt shell with combo icon, AP cost badge, target type icon, ready glow, and fast-eat button.
+
+### `Assets/Editor/SceneBuilder`
+
+- `FatBallKingdomDemoSceneBuilder.cs`
+  One-click Unity Editor scene builder for a playable demo shell. It creates placeholder art, terrain tiles, card data, combo data, token prefab, visual style assets, runtime managers, a concept-inspired isometric board, Canvas panels, and `Assets/Demo/Scenes/Demo_Battle.unity`.
 
 ### `Assets/Scripts/Units`
 

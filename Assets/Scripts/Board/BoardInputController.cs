@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -9,6 +10,9 @@ namespace AniWorld.Board
         [SerializeField] private BoardManager boardManager;
         [SerializeField] private BoardHighlighter highlighter;
         [SerializeField] private Tilemap terrainTilemap;
+
+        public event Action<Vector2Int, BoardCell> CellClicked;
+        public event Action<Vector2Int> EmptyCellClicked;
 
         private void Awake()
         {
@@ -54,14 +58,19 @@ namespace AniWorld.Board
             if (boardManager.TryGetCell(boardPos, out BoardCell cell))
             {
                 Debug.Log($"Clicked Cell: {boardPos}, Terrain: {cell.Terrain}");
+                CellClicked?.Invoke(boardPos, cell);
                 if (highlighter != null)
                 {
                     highlighter.SelectCell(boardPos);
                 }
             }
-            else if (highlighter != null)
+            else
             {
-                highlighter.ClearHighlights();
+                EmptyCellClicked?.Invoke(boardPos);
+                if (highlighter != null)
+                {
+                    highlighter.ClearHighlights();
+                }
             }
         }
     }
