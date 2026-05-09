@@ -12,6 +12,7 @@ namespace AniWorld.Tokens
         [SerializeField] private BoardManager boardManager;
         [SerializeField] private Transform unitsRoot;
         [SerializeField] private GameToken defaultTokenPrefab;
+        [SerializeField] private ClassTokenVisualDatabase classVisualDatabase;
         [SerializeField] private TeamType defaultTeam = TeamType.Player;
         [SerializeField] private DeploymentZone deploymentZone;
 
@@ -74,6 +75,11 @@ namespace AniWorld.Tokens
             }
 
             token.Initialize(card, team, position);
+            if (card.tokenSprite == null && classVisualDatabase != null)
+            {
+                token.SetTokenSprite(classVisualDatabase.GetTokenSprite(card.classType));
+            }
+
             token.transform.position = boardManager.GetCellWorldCenter(position);
 
             if (!boardManager.SetOccupiedUnit(position, token))
@@ -151,6 +157,15 @@ namespace AniWorld.Tokens
                 if (cardPrefab != null)
                 {
                     return cardPrefab;
+                }
+            }
+
+            if (card != null && classVisualDatabase != null)
+            {
+                GameToken classPrefab = classVisualDatabase.GetTokenPrefab(card.classType);
+                if (classPrefab != null)
+                {
+                    return classPrefab;
                 }
             }
 

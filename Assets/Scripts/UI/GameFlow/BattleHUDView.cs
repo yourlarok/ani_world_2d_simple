@@ -19,6 +19,15 @@ namespace AniWorld.UI.GameFlow
         [SerializeField] private Button endTurnButton;
         [SerializeField] private Button pauseButton;
 
+        [Header("Art Slots")]
+        [SerializeField] private Image hudPanelFrame;
+        [SerializeField] private Image turnBanner;
+        [SerializeField] private Image phaseBanner;
+        [SerializeField] private Image goldIcon;
+        [SerializeField] private Image apIcon;
+        [SerializeField] private Image endTurnButtonFrame;
+        [SerializeField] private Image pauseButtonFrame;
+
         private void Awake()
         {
             if (gameStateManager == null)
@@ -117,6 +126,7 @@ namespace AniWorld.UI.GameFlow
             RefreshPhase(gameStateManager != null ? gameStateManager.CurrentState : GameState.Boot);
             OnGoldChanged(goldManager != null ? goldManager.CurrentGold : 0);
             OnAPChanged(apManager != null ? apManager.CurrentAP : 0, apManager != null ? apManager.MaxAP : 0);
+            RefreshArtSlots();
         }
 
         private void RefreshTurn()
@@ -168,6 +178,25 @@ namespace AniWorld.UI.GameFlow
             if (apText != null)
             {
                 apText.text = $"AP {currentAP}/{maxAP}";
+            }
+        }
+
+        private void RefreshArtSlots()
+        {
+            SetImageEnabledIfSprite(hudPanelFrame);
+            SetImageEnabledIfSprite(turnBanner);
+            SetImageEnabledIfSprite(phaseBanner);
+            SetImageEnabledIfSprite(goldIcon);
+            SetImageEnabledIfSprite(apIcon);
+            SetImageEnabledIfSprite(endTurnButtonFrame);
+            SetImageEnabledIfSprite(pauseButtonFrame);
+        }
+
+        private static void SetImageEnabledIfSprite(Image image)
+        {
+            if (image != null)
+            {
+                image.enabled = image.sprite != null;
             }
         }
     }

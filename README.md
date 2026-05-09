@@ -123,6 +123,7 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 
 - `UI/*`
   Lightweight UGUI views for hand cards. `CardView` shows playable/blocked state, red costs for missing resources, food-card click purchase, and character-card drag.
+  `CardVisualStyle` centralizes card backgrounds, rarity frames, type frames, cost badges, and state overlays.
 
 ### `Assets/Scripts/Tokens`
 
@@ -134,6 +135,9 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 
 - `DeploymentZone.cs`
   Optional deploy-zone validator. If absent, any placeable board cell is valid for deployment.
+
+- `ClassTokenVisualDatabase.cs`
+  Optional class-to-visual database for default token sprites/prefabs/icons. Use this for Warrior circle, Assassin diamond, Mage star, Tank square, Archer triangle, and Support cross defaults.
 
 ### `Assets/Scripts/Food`
 
@@ -198,6 +202,12 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 
 - `ResultView.cs`
   Victory/defeat panel with retry and return-to-main-menu controls.
+
+- `CharacterPanelView.cs`
+  Left-side character panel shell with portrait, race/class/rarity visuals, stat icons, three food-slot visuals, Combo indicator, and fast-eat button.
+
+- `ComboReadyView.cs`
+  Combo prompt shell with combo icon, AP cost badge, target type icon, ready glow, and fast-eat button.
 
 ### `Assets/Scripts/Units`
 
@@ -367,6 +377,16 @@ Canvas
 │   ├── APText
 │   ├── EndTurnButton
 │   └── PauseButton
+├── CharacterPanel
+│   ├── Portrait
+│   ├── StatRows
+│   ├── FoodSlot x3
+│   └── FastEatButton
+├── ComboReadyPanel
+│   ├── ComboIcon
+│   ├── ComboNameText
+│   ├── APCostText
+│   └── FastEatButton
 ├── PauseMenuPanel
 │   ├── ResumeButton
 │   └── MainMenuButton
@@ -384,8 +404,111 @@ Attach:
 - `BattleHUDView` to `BattleHUDPanel`.
 - `PauseMenuView` to `PauseMenuPanel`.
 - `ResultView` to `ResultPanel`.
+- `CharacterPanelView` to `CharacterPanel`.
+- `ComboReadyView` to `ComboReadyPanel`.
 
 Wire panel and button references in the Inspector. The UI shell contains only logic and placeholder UGUI references, so its visuals can be replaced with any hand-drawn/tabletop UI sprites later.
+
+## Visual slots to prepare
+
+### Card visuals
+
+Create:
+
+```text
+Project window > Create > FatBallKingdom > Card Visual Style
+```
+
+Assign:
+
+- character card background
+- food card background
+- Common/Rare/Epic/Legendary frames
+- character/food type frames
+- Gold/AP cost badges
+- disabled overlay
+- playable glow
+- selected overlay
+
+`CardView` can also receive direct Image slots for:
+
+- background
+- rarity frame
+- card type frame
+- artwork
+- Gold/AP badges
+- disabled overlay
+- playable glow
+- selected overlay
+
+### Token visuals
+
+Create:
+
+```text
+Project window > Create > FatBallKingdom > Class Token Visual Database
+```
+
+Recommended defaults:
+
+```text
+Warrior  -> circle token
+Assassin -> diamond token
+Mage     -> six-point/star token
+Tank     -> square token
+Archer   -> triangle token
+Support  -> cross token
+```
+
+Each class can have:
+
+- token sprite
+- token prefab
+- class icon
+
+Individual `CharacterCardData` can still override with its own `tokenSprite` or `tokenPrefab`.
+
+### Menu and HUD visuals
+
+The UI shell exposes art slots for:
+
+- main menu background
+- title logo
+- parchment/wood panel frames
+- button icons
+- HUD panel frame
+- turn/phase banners
+- Gold/AP icons
+- end-turn and pause button frames
+- pause menu frame/icons
+- result background/frame/icon
+
+### Food and Combo visuals
+
+`FoodBarView` exposes:
+
+- bar background
+- slot frames
+- rarity frames
+- empty slot icons
+- duration overlays
+- food icons from `FoodCardData.artwork`
+
+`CharacterPanelView` exposes:
+
+- portrait
+- race/class/rarity visuals
+- stat icons
+- 3 food-slot frames/icons/turn labels
+- combo ready indicator
+
+`ComboReadyView` exposes:
+
+- panel frame
+- combo icon
+- AP cost badge
+- target type icon
+- ready glow
 
 ## Tile database setup
 

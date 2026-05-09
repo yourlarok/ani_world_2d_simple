@@ -10,12 +10,20 @@ namespace AniWorld.UI.GameFlow
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button mainMenuButton;
 
+        [Header("Art Slots")]
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Image panelFrame;
+        [SerializeField] private Image resumeButtonIcon;
+        [SerializeField] private Image mainMenuButtonIcon;
+
         private void Awake()
         {
             if (gameStateManager == null)
             {
                 gameStateManager = FindObjectOfType<GameStateManager>();
             }
+
+            RefreshArtSlots();
         }
 
         private void OnEnable()
@@ -52,6 +60,22 @@ namespace AniWorld.UI.GameFlow
         public void GoToMainMenu()
         {
             gameStateManager?.GoToMainMenu();
+        }
+
+        private void RefreshArtSlots()
+        {
+            SetImageEnabledIfSprite(backgroundImage);
+            SetImageEnabledIfSprite(panelFrame);
+            SetImageEnabledIfSprite(resumeButtonIcon);
+            SetImageEnabledIfSprite(mainMenuButtonIcon);
+        }
+
+        private static void SetImageEnabledIfSprite(Image image)
+        {
+            if (image != null)
+            {
+                image.enabled = image.sprite != null;
+            }
         }
     }
 }

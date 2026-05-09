@@ -12,12 +12,22 @@ namespace AniWorld.UI.GameFlow
         [SerializeField] private Button quitButton;
         [SerializeField] private GameObject optionsPanel;
 
+        [Header("Art Slots")]
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Image panelFrame;
+        [SerializeField] private Image titleLogo;
+        [SerializeField] private Image startButtonIcon;
+        [SerializeField] private Image optionsButtonIcon;
+        [SerializeField] private Image quitButtonIcon;
+
         private void Awake()
         {
             if (gameStateManager == null)
             {
                 gameStateManager = FindObjectOfType<GameStateManager>();
             }
+
+            RefreshArtSlots();
         }
 
         private void OnEnable()
@@ -63,6 +73,24 @@ namespace AniWorld.UI.GameFlow
             if (quitButton != null)
             {
                 quitButton.onClick.AddListener(QuitGame);
+            }
+        }
+
+        private void RefreshArtSlots()
+        {
+            SetImageEnabledIfSprite(backgroundImage);
+            SetImageEnabledIfSprite(panelFrame);
+            SetImageEnabledIfSprite(titleLogo);
+            SetImageEnabledIfSprite(startButtonIcon);
+            SetImageEnabledIfSprite(optionsButtonIcon);
+            SetImageEnabledIfSprite(quitButtonIcon);
+        }
+
+        private static void SetImageEnabledIfSprite(Image image)
+        {
+            if (image != null)
+            {
+                image.enabled = image.sprite != null;
             }
         }
 

@@ -9,9 +9,17 @@ namespace AniWorld.Cards.UI
     public class CardView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
         [Header("UI")]
+        [SerializeField] private CardVisualStyle visualStyle;
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private Image background;
+        [SerializeField] private Image rarityFrame;
+        [SerializeField] private Image cardTypeFrame;
         [SerializeField] private Image artwork;
+        [SerializeField] private Image goldCostBadge;
+        [SerializeField] private Image apCostBadge;
+        [SerializeField] private Image disabledOverlay;
+        [SerializeField] private Image playableGlow;
+        [SerializeField] private Image selectedOverlay;
         [SerializeField] private Text nameText;
         [SerializeField] private Text goldCostText;
         [SerializeField] private Text apCostText;
@@ -78,7 +86,16 @@ namespace AniWorld.Cards.UI
             if (background != null)
             {
                 background.color = PlayState.CanPlay ? playableColor : blockedColor;
+                SetSpriteIfAvailable(background, visualStyle != null ? visualStyle.GetBackground(Card.Category) : null);
             }
+
+            SetSpriteIfAvailable(rarityFrame, visualStyle != null ? visualStyle.GetRarityFrame(Card.Rarity) : null);
+            SetSpriteIfAvailable(cardTypeFrame, visualStyle != null ? visualStyle.GetTypeFrame(Card.Category) : null);
+            SetSpriteIfAvailable(goldCostBadge, visualStyle != null ? visualStyle.goldCostBadge : null);
+            SetSpriteIfAvailable(apCostBadge, visualStyle != null ? visualStyle.apCostBadge : null);
+            SetOverlay(disabledOverlay, visualStyle != null ? visualStyle.disabledOverlay : null, !PlayState.CanPlay);
+            SetOverlay(playableGlow, visualStyle != null ? visualStyle.playableGlow : null, PlayState.CanPlay);
+            SetOverlay(selectedOverlay, visualStyle != null ? visualStyle.selectedOverlay : null, false);
 
             if (goldCostText != null)
             {
@@ -171,6 +188,32 @@ namespace AniWorld.Cards.UI
             {
                 text.text = value;
             }
+        }
+
+        private static void SetSpriteIfAvailable(Image image, Sprite sprite)
+        {
+            if (image == null || sprite == null)
+            {
+                return;
+            }
+
+            image.sprite = sprite;
+            image.enabled = true;
+        }
+
+        private static void SetOverlay(Image image, Sprite sprite, bool visible)
+        {
+            if (image == null)
+            {
+                return;
+            }
+
+            if (sprite != null)
+            {
+                image.sprite = sprite;
+            }
+
+            image.enabled = visible && image.sprite != null;
         }
     }
 }

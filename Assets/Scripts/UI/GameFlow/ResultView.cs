@@ -15,6 +15,13 @@ namespace AniWorld.UI.GameFlow
         [SerializeField] private string victoryTitle = "Victory";
         [SerializeField] private string defeatTitle = "Defeat";
 
+        [Header("Art Slots")]
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Image panelFrame;
+        [SerializeField] private Image resultIcon;
+        [SerializeField] private Image retryButtonIcon;
+        [SerializeField] private Image mainMenuButtonIcon;
+
         private void Awake()
         {
             if (gameStateManager == null)
@@ -82,6 +89,20 @@ namespace AniWorld.UI.GameFlow
                 messageText.text = state == GameState.Victory
                     ? "The board is yours."
                     : "Your team has fallen.";
+            }
+
+            SetImageEnabledIfSprite(backgroundImage);
+            SetImageEnabledIfSprite(panelFrame);
+            SetImageEnabledIfSprite(resultIcon);
+            SetImageEnabledIfSprite(retryButtonIcon);
+            SetImageEnabledIfSprite(mainMenuButtonIcon);
+        }
+
+        private static void SetImageEnabledIfSprite(Image image)
+        {
+            if (image != null)
+            {
+                image.enabled = image.sprite != null;
             }
         }
     }

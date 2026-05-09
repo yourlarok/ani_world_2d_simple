@@ -67,6 +67,14 @@ namespace AniWorld.Tokens
             StatsChanged?.Invoke(this);
         }
 
+        public void SetTokenSprite(Sprite sprite)
+        {
+            if (tokenSpriteRenderer != null && sprite != null)
+            {
+                tokenSpriteRenderer.sprite = sprite;
+            }
+        }
+
         public bool Feed(FoodCardData food)
         {
             if (food == null)
