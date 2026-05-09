@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AniWorld.Board;
 using AniWorld.Cards.Data;
+using AniWorld.Events;
 using UnityEngine;
 
 namespace AniWorld.Tokens
@@ -83,6 +84,7 @@ namespace AniWorld.Tokens
 
             activeTokens.Add(token);
             TokenSpawned?.Invoke(token);
+            GameEventBus.Publish(new TokenSpawnedEvent(token));
             return token;
         }
 
@@ -95,11 +97,40 @@ namespace AniWorld.Tokens
 
             if (activeTokens.Remove(token))
             {
-                boardManager.ClearOccupiedUnit(token.BoardPosition);
+                if (boardManager != null)
+                {
+                    boardManager.ClearOccupiedUnit(token.BoardPosition);
+                }
+
                 TokenRemoved?.Invoke(token);
+                GameEventBus.Publish(new TokenRemovedEvent(token));
             }
 
             Destroy(token.gameObject);
+        }
+
+        public void ClearAll()
+        {
+            for (int i = activeTokens.Count - 1; i >= 0; i--)
+            {
+                GameToken token = activeTokens[i];
+                if (token == null)
+                {
+                    activeTokens.RemoveAt(i);
+                    continue;
+                }
+
+                if (boardManager != null)
+                {
+                    boardManager.ClearOccupiedUnit(token.BoardPosition);
+                }
+
+                TokenRemoved?.Invoke(token);
+                GameEventBus.Publish(new TokenRemovedEvent(token));
+                Destroy(token.gameObject);
+            }
+
+            activeTokens.Clear();
         }
 
         public GameToken GetTokenAt(Vector2Int position)

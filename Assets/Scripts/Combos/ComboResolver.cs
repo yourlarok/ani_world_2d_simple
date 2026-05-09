@@ -1,6 +1,7 @@
 using AniWorld.Board;
 using AniWorld.Cards.Data;
 using AniWorld.Cards.Runtime;
+using AniWorld.Events;
 using AniWorld.Tokens;
 using UnityEngine;
 
@@ -58,6 +59,7 @@ namespace AniWorld.Combos
             }
 
             ExecuteEffect(request);
+            GameEventBus.Publish(new ComboTriggeredEvent(request));
             return true;
         }
 

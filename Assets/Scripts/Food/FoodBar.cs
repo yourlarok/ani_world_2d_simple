@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AniWorld.Cards.Data;
+using AniWorld.Events;
 using AniWorld.Tokens;
 using UnityEngine;
 
@@ -27,6 +28,7 @@ namespace AniWorld.Food
 
             slots.Add(food);
             FoodBarChanged?.Invoke();
+            GameEventBus.Publish(new FoodStoredEvent(food));
             return true;
         }
 
@@ -58,7 +60,14 @@ namespace AniWorld.Food
 
             slots.RemoveAt(foodIndex);
             FoodBarChanged?.Invoke();
+            GameEventBus.Publish(new FoodFedEvent(food, token));
             return true;
+        }
+
+        public void Clear()
+        {
+            slots.Clear();
+            FoodBarChanged?.Invoke();
         }
     }
 }

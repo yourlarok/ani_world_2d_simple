@@ -15,8 +15,7 @@ namespace AniWorld.Cards.Runtime
 
         private void Awake()
         {
-            CurrentGold = initialGold;
-            GoldChanged?.Invoke(CurrentGold);
+            ResetGold();
         }
 
         public bool CanSpend(int amount)
@@ -39,6 +38,12 @@ namespace AniWorld.Cards.Runtime
         public void AddGold(int amount)
         {
             CurrentGold += Mathf.Max(0, amount);
+            GoldChanged?.Invoke(CurrentGold);
+        }
+
+        public void ResetGold()
+        {
+            CurrentGold = Mathf.Max(0, initialGold);
             GoldChanged?.Invoke(CurrentGold);
         }
 

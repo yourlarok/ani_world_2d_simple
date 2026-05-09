@@ -157,6 +157,31 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 - `ComboTargetingController.cs`
   Enters target-selection mode for combo skills that need a board cell or token target.
 
+### `Assets/Scripts/Events`
+
+- `GameEventBus.cs`
+  Lightweight typed event bus with `Subscribe`, `Unsubscribe`, `Publish`, and `Clear`.
+
+- `GameEvents.cs`
+  Standard gameplay events for state changes, run setup, turns, cards, food, tokens, combos, terrain, victory, and defeat.
+
+### `Assets/Scripts/GameFlow`
+
+- `GameStateManager.cs`
+  High-level state machine for main menu, run loading, battle preparation, player/enemy turns, victory, defeat, and pause.
+
+- `TurnManager.cs`
+  Owns turn number and turn owner. Starts/ends player and enemy turns, grants per-turn resources after the first player turn, refills hand, and ticks token food slots.
+
+- `RunSetupManager.cs`
+  Prepares a battle by resetting runtime systems, generating/loading the board, rebuilding the card pool, drawing the initial hand, and resetting turns.
+
+- `VictoryConditionManager.cs`
+  Basic placeholder that publishes victory/defeat events when one side has no living tokens.
+
+- `GameFlowBootstrap.cs`
+  Optional helper for entering main menu or starting a run automatically.
+
 ### `Assets/Scripts/Units`
 
 - `UnitData.cs`
@@ -221,14 +246,19 @@ Scene
 │   ├── GoldManager
 │   ├── APManager
 │   ├── CardPlayValidator
-│   ├── CardDragController
-│   └── CardGameSession
+│   └── CardDragController
 ├── FoodRuntime
 │   └── FoodBar
 ├── ComboRuntime
 │   ├── ComboManager
 │   ├── ComboResolver
 │   └── ComboTargetingController
+├── GameFlowRuntime
+│   ├── GameStateManager
+│   ├── TurnManager
+│   ├── RunSetupManager
+│   ├── VictoryConditionManager
+│   └── GameFlowBootstrap
 └── BoardRoot
     └── UnitsRoot / TokenSpawner
 ```
@@ -280,6 +310,28 @@ Assign references:
   - `ComboResolver`
   - `TokenSpawner`
 
+- `GameStateManager`
+  - `RunSetupManager`
+  - `TurnManager`
+
+- `TurnManager`
+  - `GoldManager`
+  - `APManager`
+  - `HandManager`
+  - `TokenSpawner`
+  - `Grant Resources On First Player Turn` should usually stay off because the run starts with initial Gold/AP.
+
+- `RunSetupManager`
+  - `BoardManager`
+  - optional `BoardRandomGenerator`
+  - `CardPool`
+  - `HandManager`
+  - `GoldManager`
+  - `APManager`
+  - `FoodBar`
+  - `TokenSpawner`
+  - `TurnManager`
+
 ## Tile database setup
 
 Create the database:
@@ -315,6 +367,63 @@ For physical collision support, attach `BoardTilemapCollisionSetup` to `TerrainT
 - `Rigidbody2D` set to `Static` when using Composite Collider
 
 Use collider setup for physics interaction, blockers, and future visual effects. Do not use physics raycasts as the primary board selection or movement rule system.
+
+## Game flow and turns
+
+The outer game framework is intentionally separate from board/card systems. Prefer this flow for normal play:
+
+```text
+GameFlowBootstrap / MainMenu Start Button
+    -> GameStateManager.StartNewRun()
+    -> RunSetupManager.PrepareBattle()
+        -> reset FoodBar, Tokens, Gold, AP
+        -> generate/load Board
+        -> rebuild CardPool
+        -> draw initial Hand
+        -> reset TurnManager
+    -> PlayerTurnStart
+    -> PlayerTurn
+```
+
+Then UI buttons can call:
+
+```csharp
+gameStateManager.EndPlayerTurn();
+gameStateManager.EndEnemyTurn();
+```
+
+`TurnManager` handles:
+
+- turn number
+- current owner
+- player turn start hand refill
+- player token turn start/end
+- enemy token turn start/end
+- Gold/AP income after the first player turn by default
+
+The first player turn does not grant extra Gold/AP unless `Grant Resources On First Player Turn` is enabled. This keeps the run start at the configured initial 10 Gold and starting AP.
+
+## Events
+
+Use `GameEventBus` to decouple UI, effects, and flow:
+
+```csharp
+GameEventBus.Subscribe<TurnStartedEvent>(OnTurnStarted);
+GameEventBus.Publish(new CardPurchasedEvent(card));
+GameEventBus.Unsubscribe<TurnStartedEvent>(OnTurnStarted);
+```
+
+Current standard events include:
+
+- `GameStateChangedEvent`
+- `RunStartedEvent`, `RunPreparedEvent`, `RunResetEvent`
+- `TurnStartedEvent`, `TurnEndedEvent`
+- `CardPurchasedEvent`, `CardDiscardedEvent`
+- `FoodStoredEvent`, `FoodFedEvent`
+- `TokenSpawnedEvent`, `TokenRemovedEvent`
+- `ComboReadyEvent`, `ComboTriggeredEvent`
+- `TerrainChangedEvent`
+- `VictoryEvent`, `DefeatEvent`
 
 ## Card, gold, AP, and combo flow
 

@@ -17,8 +17,7 @@ namespace AniWorld.Cards.Runtime
 
         private void Awake()
         {
-            CurrentAP = Mathf.Clamp(startingAP, 0, maxAP);
-            APChanged?.Invoke(CurrentAP, maxAP);
+            ResetAP();
         }
 
         public bool CanSpend(int amount)
@@ -41,6 +40,12 @@ namespace AniWorld.Cards.Runtime
         public void AddAP(int amount)
         {
             CurrentAP = Mathf.Clamp(CurrentAP + Mathf.Max(0, amount), 0, maxAP);
+            APChanged?.Invoke(CurrentAP, maxAP);
+        }
+
+        public void ResetAP()
+        {
+            CurrentAP = Mathf.Clamp(startingAP, 0, maxAP);
             APChanged?.Invoke(CurrentAP, maxAP);
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AniWorld.Cards.Data;
+using AniWorld.Events;
 using AniWorld.Food;
 using AniWorld.Tokens;
 using UnityEngine;
@@ -52,6 +53,13 @@ namespace AniWorld.Cards.Runtime
         {
             hand.Clear();
             RefillHand();
+            HandChanged?.Invoke();
+        }
+
+        public void ClearHand()
+        {
+            hand.Clear();
+            discardCountThisTurn = 0;
             HandChanged?.Invoke();
         }
 
@@ -144,6 +152,7 @@ namespace AniWorld.Cards.Runtime
             hand.RemoveAt(handIndex);
             discardCountThisTurn++;
             CardDiscarded?.Invoke(card);
+            GameEventBus.Publish(new CardDiscardedEvent(card));
             HandChanged?.Invoke();
             return true;
         }
@@ -164,6 +173,7 @@ namespace AniWorld.Cards.Runtime
         {
             hand.RemoveAt(handIndex);
             CardPurchased?.Invoke(card);
+            GameEventBus.Publish(new CardPurchasedEvent(card));
             RefillHand();
             HandChanged?.Invoke();
         }

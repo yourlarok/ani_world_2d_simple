@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AniWorld.Events;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -74,6 +75,7 @@ namespace AniWorld.Board
                 existingCell.SetTerrain(terrain);
                 RefreshTerrainTile(pos, terrain);
                 CellUpdated?.Invoke(existingCell);
+                GameEventBus.Publish(new TerrainChangedEvent(pos, terrain));
                 return;
             }
 
@@ -82,6 +84,7 @@ namespace AniWorld.Board
             UpdateBoundsForAddedCell(pos);
             RefreshTerrainTile(pos, terrain);
             CellAdded?.Invoke(cell);
+            GameEventBus.Publish(new TerrainChangedEvent(pos, terrain));
         }
 
         public void RemoveCell(Vector2Int pos)

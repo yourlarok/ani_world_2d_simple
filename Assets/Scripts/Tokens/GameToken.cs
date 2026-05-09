@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AniWorld.Board;
 using AniWorld.Cards.Data;
 using AniWorld.Combos;
+using AniWorld.Events;
 using AniWorld.Food;
 using UnityEngine;
 
@@ -85,6 +86,7 @@ namespace AniWorld.Tokens
             if (combo != null)
             {
                 ComboReady?.Invoke(this, combo);
+                GameEventBus.Publish(new ComboReadyEvent(this, combo));
             }
 
             StatsChanged?.Invoke(this);
