@@ -67,6 +67,9 @@ Keep `Grid > Cell Layout` set to `Isometric`. The board is not hexagonal.
 - `BoardCoordinateUtility.cs`
   Converts between `Vector2Int`, Tilemap `Vector3Int`, and world cell centers.
 
+- `BoardTilemapCollisionSetup.cs`
+  Optional helper for `TerrainTilemap`. Adds/configures `TilemapCollider2D`, `CompositeCollider2D`, and a static `Rigidbody2D` for future physical interactions.
+
 - `TerrainPatch.cs`
   `ScriptableObject` terrain template. Used to place prepared terrain modules into the board.
 
@@ -161,7 +164,7 @@ Tile images should be imported as Sprite assets, then converted to Unity Tile as
 
 Board logic should still use `BoardCell.Walkable` and `BoardCell.MoveCost`.
 
-For physical collision support, add these components to `TerrainTilemap`:
+For physical collision support, attach `BoardTilemapCollisionSetup` to `TerrainTilemap`, or add these components manually:
 
 - `TilemapCollider2D`
 - optional `CompositeCollider2D`
